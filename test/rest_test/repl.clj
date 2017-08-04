@@ -1,3 +1,2 @@
 (ns rest-test.repl
-  (:require
-    [midje.repl :refer :all]))
+  (:require [midje.repl :refer :all]))
