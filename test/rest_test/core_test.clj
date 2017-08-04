@@ -1,7 +1,6 @@
 (ns rest-test.core-test
-  (:require [clojure.test :refer :all]
-            [rest-test.core :refer :all]))
+  (:require [midje.sweet :refer :all]
+            [rest-test.core :as core]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(fact "math still works"
+  (+ 2 2) => 4)
