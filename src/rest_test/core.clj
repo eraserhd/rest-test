@@ -1,5 +1,9 @@
 (ns rest-test.core)
 
+(defn pure-handler
+  [request]
+  {:status 200
+   :body "Hello, world!"})
 
 (defn wrap-state
   "Ring middleware to track application state.
@@ -17,5 +21,4 @@
             (reset! state-atom (:state result)))
           result)))))
 
-(defn handler
-  [request])
+(def handler (wrap-state pure-handler []))
