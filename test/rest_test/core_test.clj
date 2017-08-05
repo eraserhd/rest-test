@@ -25,10 +25,10 @@
 
 (facts "about the `wrap-state` ring middleware"
   (fact "`wrap-state` passes initial state to the wrapped middleware"
-    (->> (results [{:initial-state 42}])
-      (map :passed-request)
-      first) => (contains {:state 42}))
+    (:passed-request (first (results [{:initial-state 42}]))) => (contains {:state 42}))
   (fact "`wrap-state` returns the wrapped middleware's response"
-    (->> (results [{:handler-result {:foo "hi, mom!"}}])
-      (map :result)
-      first) => {:foo "hi, mom!"}))
+    (:result (first (results [{:handler-result {:foo "hi, mom!"}}]))) => {:foo "hi, mom!"})
+  (fact "`wrap-state` updates the state if returned by the wrapped middleware"
+    (:passed-request (last (results [{:initial-state 42,
+                                      :handler-result {:state 79}}
+                                     {}]))) => (contains {:state 79})))
