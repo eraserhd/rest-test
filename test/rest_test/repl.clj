@@ -1,2 +1,7 @@
 (ns rest-test.repl
-  (:require [midje.repl :refer :all]))
+  (:require [midje.config]))
+
+;; Convince Midje we are started from the REPL even though we're requiring
+;; it from a compiled file -- Midje won't load the online docs otherwise.
+(alter-var-root #'midje.config/started-in-repl? (constantly true))
+(use 'midje.repl)
