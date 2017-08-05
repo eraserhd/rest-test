@@ -4,8 +4,9 @@
             [rest-test.core :as core]))
 
 (defn- handle
-  [& [{:keys [initial-state handler-result]
-       :or {initial-state [],
+  [& [{:keys [request initial-state handler-result]
+       :or {requeset {},
+            initial-state [],
             handler-result {}}}]]
   (let [passed-request (atom nil)
         handler (core/wrap-state
@@ -19,4 +20,6 @@
 
 (facts "about the `wrap-state` ring middleware"
   (fact "`wrap-state` passes initial state to the wrapped middleware"
-    (:passed-request (handle {:initial-state 42})) => (contains {:state 42})))
+    (:passed-request (handle {:initial-state 42})) => (contains {:state 42}))
+  (fact "`wrap-state` returns the wrapped middleware's response"
+    (:result (handle {:handler-result {:foo "hi, mom!"}})) => {:foo "hi, mom!"}))
