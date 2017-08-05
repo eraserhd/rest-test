@@ -1,9 +1,15 @@
-(ns rest-test.core)
+(ns rest-test.core
+  (:require [ring.middleware.json]))
 
-(defn pure-handler
+(defn not-found
   [request]
-  {:status 200
-   :body "Hello, world!"})
+  {:status 404
+   :body "Not found!"})
+
+(def pure-handler
+  (-> not-found
+    ring.middleware.json/wrap-json-response
+    (ring.middleware.json/wrap-json-body :keywords? true)))
 
 (defn wrap-state
   "Ring middleware to track application state.
