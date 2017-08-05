@@ -3,23 +3,32 @@
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
 
-(defn- handle
-  [& [{:keys [request initial-state handler-result]
-       :or {requeset {},
-            initial-state [],
-            handler-result {}}}]]
-  (let [passed-request (atom nil)
+(defn- results
+  [requests]
+  (let [passed-request-atom (atom nil)
+        handler-result-atom (atom nil)
+        initial-state (or (:initial-state (first requests)) [])
         handler (core/wrap-state
                   (fn [request]
-                    (reset! passed-request request)
-                    handler-result)
-                  initial-state)
-        result (handler {})]
-    {:result result
-     :passed-request @passed-request}))
+                    (reset! passed-request-atom request)
+                    @handler-result-atom)
+                  initial-state)]
+    (doall
+      (for [{:keys [request handler-result]
+             :or {request {},
+                  handler-result {}}} requests]
+        (do
+          (reset! handler-result-atom handler-result)
+          (let [result (handler request)]
+            {:result result
+             :passed-request @passed-request-atom}))))))
 
 (facts "about the `wrap-state` ring middleware"
   (fact "`wrap-state` passes initial state to the wrapped middleware"
-    (:passed-request (handle {:initial-state 42})) => (contains {:state 42}))
+    (->> (results [{:initial-state 42}])
+      (map :passed-request)
+      first) => (contains {:state 42}))
   (fact "`wrap-state` returns the wrapped middleware's response"
-    (:result (handle {:handler-result {:foo "hi, mom!"}})) => {:foo "hi, mom!"}))
+    (->> (results [{:handler-result {:foo "hi, mom!"}}])
+      (map :result)
+      first) => {:foo "hi, mom!"}))
