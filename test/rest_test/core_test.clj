@@ -3,5 +3,13 @@
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
 
-(fact "math still works"
-  (+ 2 2) => 4)
+(facts "about the `wrap-state` ring middleware"
+  (fact "`wrap-state` passes initial state to the wrapped middleware"
+    (let [passed-request (atom nil)
+          handler (core/wrap-state
+                    (fn [request]
+                      (reset! passed-request request)
+                      {})
+                    42)
+          result (handler {})]
+      @passed-request => (contains {:state 42}))))
