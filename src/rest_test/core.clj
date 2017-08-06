@@ -95,6 +95,9 @@
   (str (.toLowerCase (subs s 0 1)) (subs s 1)))
 
 (defn- json-preferred-keys
+  "Replace keywords in data with strings preferred in JSON.
+
+  e.g. :first-name ;=> \"firstName\""
   [data]
   (walk/postwalk
     (fn [entity]
