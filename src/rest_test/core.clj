@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
-            [clojure.walk :as walk]
+            [rest-test.json]
             [rest-test.state :as state]
             [ring.middleware.json])
   (:import [java.text SimpleDateFormat]))
@@ -92,30 +92,6 @@
   (let [[year month day] (string/split internal-format #"-")]
     (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
 
-(defn- uncapitalize
-  [s]
-  (str (.toLowerCase (subs s 0 1)) (subs s 1)))
-
-(defn- wrap-json-preferred-keys
-  "Replace keywords in data with strings preferred in JSON.
-
-  e.g. :first-name becomes \"firstName\""
-  [handler]
-  (fn wrap-json-preferred-keys* [request]
-    (let [response (handler request)]
-      (cond-> response
-        (coll? (:body response))
-        (update :body (fn [body]
-                        (walk/postwalk
-                          (fn [entity]
-                            (if (keyword? entity)
-                              (->> (string/split (name entity) #"-")
-                                (map string/capitalize)
-                                string/join
-                                uncapitalize)
-                              entity))
-                          body)))))))
-
 (defn- get-handler
   [handler kind sort-key-fn descending?]
   (fn get-records* [{:keys [request-method uri state] :as request}]
@@ -134,7 +110,7 @@
     (get-handler "gender" (juxt ::gender ::last-name) false)
     (get-handler "birthdate" ::birthdate false)
     (get-handler "name" ::last-name true)
-    wrap-json-preferred-keys
+    rest-test.json/wrap-json-preferred-keys
     ring.middleware.json/wrap-json-response))
 
 ;; Everything below this line isn't (mechanically) tested
