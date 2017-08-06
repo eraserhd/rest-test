@@ -3,6 +3,10 @@
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
 
+(facts "about the REST service"
+  (fact "random URLs respond with 404"
+    (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404))
+
 (defn- results
   [requests]
   (let [passed-request-atom (atom nil)
