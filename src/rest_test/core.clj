@@ -1,5 +1,6 @@
 (ns rest-test.core
   (:require [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
             [ring.middleware.json])
   (:import [java.text SimpleDateFormat]))
@@ -18,7 +19,27 @@
 (s/def ::first-name (s/and string? not-empty))
 (s/def ::gender (s/and string? not-empty))
 (s/def ::favorite-color (s/and string? not-empty))
-(s/def ::birthdate (s/and string? date-valid?))
+
+;; We supply our own generator for ::birthdate because the default one
+;; would generate random unicode strings until it finds a valid birthdate.
+;; How many, on average, would need to be generated before finding a valid
+;; birth date is left as an exercise to the reader.
+;;
+;; (We still need gen/such-that to prevent dates like 1976-02-31.)
+(s/def ::birthdate
+  (s/spec (s/and string? date-valid?)
+          :gen (fn make-birthdate-generator []
+                 (gen/such-that
+                   date-valid?
+                   (gen/fmap
+                     (fn [[year month day]]
+                       (format "%04d-%02d-%02d" year month day))
+                     (gen/tuple
+                       (gen/choose 1890 2017)
+                       (gen/choose 1 12)
+                       (gen/choose 1 31)))))))
+
+
 (s/def ::record (s/keys :req [::first-name
                               ::gender
                               ::favorite-color

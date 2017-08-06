@@ -10,6 +10,7 @@
                  [ring/ring-jetty-adapter "1.6.2"]
                  [ring/ring-json "0.4.0"]]
   :profiles {:dev {:dependencies [[midje "1.9.0-alpha6"]
+                                  [org.clojure/test.check "0.10.0-alpha2"]
                                   [ring/ring-mock "0.3.1"]]
                    :plugins [[lein-midje "3.2.1"]
                              [lein-ring "0.12.0"]]}}

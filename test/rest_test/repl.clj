@@ -1,5 +1,6 @@
 (ns rest-test.repl
   (:require [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [midje.config]))
 
 ;; Convince Midje we are started from the REPL even though we're requiring
