@@ -6,6 +6,7 @@
 (s/def ::last-name string?)
 (s/def ::first-name (s/and string? not-empty))
 (s/def ::gender (s/and string? not-empty))
+(s/def ::favorite-color (s/and string? not-empty))
 (s/def ::record (s/keys :req [::first-name
                               ::gender
                               ::favorite-color

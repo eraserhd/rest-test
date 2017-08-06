@@ -93,7 +93,8 @@
         (:status (post "," {:fields ["" "Joe" "male" "blue" "1997-02-12"]})) => 200)
       (fact "gender must not be empty"
         (:status (post "," {:fields ["Fabetes" "Joe" "" "blue" "1997-02-12"]})) => 400)
-      (pending-fact "favorite color must not be empty")
+      (fact "favorite color must not be empty"
+        (:status (post "," {:fields ["Fabetes" "Joe" "male" "" "1997-02-12"]})) => 400)
       (pending-fact "birthdate must be a valid date")))
   (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
   (pending-fact "/records/gender returns records sorted by gender")
