@@ -44,7 +44,7 @@
 
 (defn- in-ascending-order?
   [coll]
-  (every? (fn [[a b]] (<= a b)) (partition 2 1 coll)))
+  (every? (fn [[a b]] (<= (compare a b) 0)) (partition 2 1 coll)))
 
 (facts "about the REST service"
   (fact "random URLs respond with 404"
@@ -141,7 +141,14 @@
             json-result (json/parse-string (:body result) keyword)
             birthdates (map ::core/birthdate (:records json-result))]
         (every? #(re-matches #"[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}" %) birthdates))))
-  (pending-fact "/records/gender returns records sorted by gender")
+  (property "/records/gender returns records sorted by gender, then by last name" 50
+    (prop/for-all [state (s/gen ::core/parsed-body)]
+      (let [result (-> (mock/request :get "/records/gender")
+                     (assoc :state state)
+                     core/pure-handler)
+            json-result (json/parse-string (:body result) keyword)
+            result-keys (map (juxt ::core/gender ::core/last-name) (:records json-result))]
+        (in-ascending-order? result-keys))))
   (pending-fact "/records/birthdate returns records sorted by birthdate")
   (pending-fact "/records/name returns records sorted by name"))
 

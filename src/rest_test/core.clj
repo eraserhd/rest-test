@@ -43,7 +43,8 @@
 (s/def ::record (s/keys :req [::first-name
                               ::gender
                               ::favorite-color
-                              ::birthdate]))
+                              ::birthdate]
+                        :opt [::last-name]))
 (s/def ::parsed-body (s/coll-of ::record :kind set?))
 
 (defn not-found
@@ -84,20 +85,21 @@
     (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
 
 (defn- get-records
-  [handler kind]
+  [handler kind sort-key-fn]
   (fn get-records* [{:keys [request-method uri state] :as request}]
     (if-not (= [request-method uri] [:get (str "/records/" kind)])
       (handler request)
       {:status 200
        :body {:records (->> state
-                         (map #(update % ::birthdate present-date)))}})))
+                         (map #(update % ::birthdate present-date))
+                         (sort-by sort-key-fn))}})))
 
 (def pure-handler
   (-> not-found
     post-records
-    (get-records "gender")
-    (get-records "birthdate")
-    (get-records "name")
+    (get-records "gender" (juxt ::gender ::last-name))
+    (get-records "birthdate" ::birthdate)
+    (get-records "name" ::first-name)
     ring.middleware.json/wrap-json-response
     (ring.middleware.json/wrap-json-body :keywords? true)))
 
