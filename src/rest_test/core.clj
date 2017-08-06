@@ -1,6 +1,14 @@
 (ns rest-test.core
-  (:require [clojure.string :as string]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [ring.middleware.json]))
+
+(s/def ::first-name (s/and string? not-empty))
+(s/def ::record (s/keys :req [::first-name
+                              ::gender
+                              ::favorite-color
+                              ::birthdate]))
+(s/def ::parsed-body (s/coll-of ::record :kind set?))
 
 (defn not-found
   [request]
@@ -25,9 +33,14 @@
   (fn post-records* [{:keys [request-method uri state body] :as request}]
     (if-not (= [request-method uri] [:post "/records"])
       (handler request)
-      {:status 200
-       :state (into state (parse-body (slurp body)))
-       :body {:status "ok"}})))
+      (let [parsed-body (parse-body (slurp body))]
+        (if (s/valid? ::parsed-body parsed-body)
+          {:status 200
+           :state (into state parsed-body)
+           :body {:status "ok"}}
+          {:status 400
+           :body {:status "error"
+                  :error (s/explain-str ::parsed-body parsed-body)}})))))
 
 (def pure-handler
   (-> not-found

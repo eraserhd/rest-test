@@ -11,12 +11,13 @@
    " " "text/plain"})
 
 (defn- post
-  [delimiter & [{:keys [initial-state]
-                 :or {initial-state #{}}}]]
+  [delimiter & [{:keys [initial-state fields]
+                 :or {initial-state #{}
+                      fields ["Fabetes" "Joe" "male" "blue" "1997-02-12"]}}]]
   (-> (mock/request :post "/records")
     (mock/header "Content-Type" (get content-types delimiter))
     (mock/body (str
-                 (string/join delimiter ["Fabetes" "Joe" "male" "blue" "1997-02-12"]) "\n"
+                 (string/join delimiter fields) "\n"
                  (string/join delimiter ["Smith" "Jane" "female" "green" "1973-05-06"]) "\n"))
     (assoc :state initial-state)
     core/pure-handler))
@@ -86,7 +87,8 @@
       (:headers (post ",")) => (contains {"Content-Type" #"application/json"})
       (json/parse-string (:body (post ","))) => {"status" "ok"})
     (facts "posts to /records validate input fields"
-      (pending-fact "first name must not be empty")
+      (fact "first name must not be empty"
+        (:status (post "," {:fields ["Fabetes" "" "male" "blue" "1997-02-12"]})) => 400)
       (pending-fact "last name can be empty")
       (pending-fact "gender must not be empty")
       (pending-fact "favorite color must not be empty")

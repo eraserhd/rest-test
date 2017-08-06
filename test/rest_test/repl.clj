@@ -1,5 +1,6 @@
 (ns rest-test.repl
-  (:require [midje.config]))
+  (:require [clojure.spec.alpha :as s]
+            [midje.config]))
 
 ;; Convince Midje we are started from the REPL even though we're requiring
 ;; it from a compiled file -- Midje won't load the online docs otherwise.
