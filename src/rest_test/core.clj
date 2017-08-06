@@ -13,10 +13,10 @@
    "pipe-delimited.txt"
    "space-delimited.txt"])
 
-(s/def ::last-name string?)
-(s/def ::first-name (s/and string? not-empty))
+(s/def ::lastName string?)
+(s/def ::firstName (s/and string? not-empty))
 (s/def ::gender (s/and string? not-empty))
-(s/def ::favorite-color (s/and string? not-empty))
+(s/def ::favoriteColor (s/and string? not-empty))
 
 (defn- date-valid?
   [s]
@@ -48,11 +48,11 @@
                        (gen/choose 1 31)))))))
 
 
-(s/def ::record (s/keys :req [::first-name
+(s/def ::record (s/keys :req [::firstName
                               ::gender
-                              ::favorite-color
+                              ::favoriteColor
                               ::birthdate]
-                        :opt [::last-name]))
+                        :opt [::lastName]))
 (s/def ::parsed-body (s/coll-of ::record :kind set?))
 
 (defn- not-found-handler
@@ -65,11 +65,11 @@
   (into #{}
         (comp
           (map #(string/split % #"[,| ]"))
-          (map (fn [[last-name first-name gender favorite-color birthdate]]
-                 {::last-name last-name
-                  ::first-name first-name
+          (map (fn [[lastName firstName gender favoriteColor birthdate]]
+                 {::lastName lastName
+                  ::firstName firstName
                   ::gender gender
-                  ::favorite-color favorite-color
+                  ::favoriteColor favoriteColor
                   ::birthdate birthdate})))
         (string/split body #"\n")))
 
@@ -107,9 +107,9 @@
 (def pure-handler
   (-> not-found-handler
     post-handler
-    (get-handler "gender" (juxt ::gender ::last-name) false)
+    (get-handler "gender" (juxt ::gender ::lastName) false)
     (get-handler "birthdate" ::birthdate false)
-    (get-handler "name" ::last-name true)
+    (get-handler "name" ::lastName true)
     rest-test.json/wrap-json-preferred-keys
     ring.middleware.json/wrap-json-response))
 

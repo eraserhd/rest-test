@@ -55,60 +55,60 @@
   (facts "about posts to /records"
     (fact "posts to /records accept comma-separated values"
       (:status (post ",")) => 200
-      (:state (post ",")) => #{{::core/last-name "Fabetes",
-                                ::core/first-name "Joe",
+      (:state (post ",")) => #{{::core/lastName "Fabetes",
+                                ::core/firstName "Joe",
                                 ::core/gender "male",
-                                ::core/favorite-color "blue",
+                                ::core/favoriteColor "blue",
                                 ::core/birthdate "1997-02-12"}
-                               {::core/last-name "Smith",
-                                ::core/first-name "Jane",
+                               {::core/lastName "Smith",
+                                ::core/firstName "Jane",
                                 ::core/gender "female"
-                                ::core/favorite-color "green"
+                                ::core/favoriteColor "green"
                                 ::core/birthdate "1973-05-06"}})
     (fact "posts to /records accept pipe-delimited records"
       (:status (post "|")) => 200
-      (:state (post "|")) => #{{::core/last-name "Fabetes",
-                                ::core/first-name "Joe",
+      (:state (post "|")) => #{{::core/lastName "Fabetes",
+                                ::core/firstName "Joe",
                                 ::core/gender "male",
-                                ::core/favorite-color "blue",
+                                ::core/favoriteColor "blue",
                                 ::core/birthdate "1997-02-12"}
-                               {::core/last-name "Smith",
-                                ::core/first-name "Jane",
+                               {::core/lastName "Smith",
+                                ::core/firstName "Jane",
                                 ::core/gender "female"
-                                ::core/favorite-color "green"
+                                ::core/favoriteColor "green"
                                 ::core/birthdate "1973-05-06"}})
     (fact "posts to /records accept space-delimited records"
       (:status (post " ")) => 200
-      (:state (post " ")) => #{{::core/last-name "Fabetes",
-                                ::core/first-name "Joe",
+      (:state (post " ")) => #{{::core/lastName "Fabetes",
+                                ::core/firstName "Joe",
                                 ::core/gender "male",
-                                ::core/favorite-color "blue",
+                                ::core/favoriteColor "blue",
                                 ::core/birthdate "1997-02-12"}
-                               {::core/last-name "Smith",
-                                ::core/first-name "Jane",
+                               {::core/lastName "Smith",
+                                ::core/firstName "Jane",
                                 ::core/gender "female"
-                                ::core/favorite-color "green"
+                                ::core/favoriteColor "green"
                                 ::core/birthdate "1973-05-06"}})
     (fact "posts to /records preserve existing records"
-      (let [initial-state #{{::core/last-name "Begone"
-                             ::core/first-name "Bob"
+      (let [initial-state #{{::core/lastName "Begone"
+                             ::core/firstName "Bob"
                              ::core/gender "male"
-                             ::core/favorite-color "mauve"
+                             ::core/favoriteColor "mauve"
                              ::core/birthdate "1981-07-01"}}]
-        (:state (post "," {:initial-state initial-state})) => #{{::core/last-name "Fabetes",
-                                                                 ::core/first-name "Joe",
+        (:state (post "," {:initial-state initial-state})) => #{{::core/lastName "Fabetes",
+                                                                 ::core/firstName "Joe",
                                                                  ::core/gender "male",
-                                                                 ::core/favorite-color "blue",
+                                                                 ::core/favoriteColor "blue",
                                                                  ::core/birthdate "1997-02-12"}
-                                                                {::core/last-name "Smith",
-                                                                 ::core/first-name "Jane",
+                                                                {::core/lastName "Smith",
+                                                                 ::core/firstName "Jane",
                                                                  ::core/gender "female"
-                                                                 ::core/favorite-color "green"
+                                                                 ::core/favoriteColor "green"
                                                                  ::core/birthdate "1973-05-06"}
-                                                                {::core/last-name "Begone",
-                                                                 ::core/first-name "Bob",
+                                                                {::core/lastName "Begone",
+                                                                 ::core/firstName "Bob",
                                                                  ::core/gender "male",
-                                                                 ::core/favorite-color "mauve"
+                                                                 ::core/favoriteColor "mauve"
                                                                  ::core/birthdate "1981-07-01"}}))
     (fact "successful posts to /records respond with a JSON success message"
       (:headers (post ",")) => (contains {"Content-Type" #"application/json"})
@@ -131,7 +131,7 @@
     (prop/for-all [state (s/gen ::core/parsed-body)
                    endpoint-type (gen/elements ["gender" "birthdate" "name"])]
       (= (count state) (count (records endpoint-type state)))))
-  (property "all record retrieval endpoints return dates in M/D/YYYY format"
+  (property "all record retrieval endpoints return dates in M/D/YYYY format" ;;
     (prop/for-all [state (s/gen ::core/parsed-body)
                    endpoint-type (gen/elements ["gender" "birthdate" "name"])]
         (every? #(re-matches #"[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}" %)
@@ -139,8 +139,8 @@
   (property "/records/gender returns records sorted by gender, then by last name" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "gender" state)
-                             (map (juxt ::core/gender ::core/last-name))))))
-  (property "/records/birthdate returns records sorted ascending by birthdate" 50
+                             (map (juxt ::core/gender ::core/lastName))))))
+  (property "/records/birthdate returns records sorted ascending by birthdate" 50 ;;
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "birthdate" state)
                              (map :birthdate)
@@ -148,5 +148,5 @@
   (property "/records/name returns records sorted descending by last name" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "name" state)
-                             (map :last-name)
+                             (map :lastName)
                              reverse)))))
