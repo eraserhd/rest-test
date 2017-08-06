@@ -42,6 +42,14 @@
    `(fact ~descr
       (clojure.test.check/quick-check ~trials ~prop) => holds?)))
 
+(defn- records
+  [endpoint-kind state]
+  (let [result (-> (mock/request :get "/records/gender")
+                 (assoc :state state)
+                 core/pure-handler)
+        json-result (json/parse-string (:body result) keyword)]
+    (:records json-result)))
+
 (defn- in-ascending-order?
   [coll]
   (every? (fn [[a b]] (<= (compare a b) 0)) (partition 2 1 coll)))
@@ -127,28 +135,16 @@
   (property "all record retrieval endpoints return all records"
     (prop/for-all [state (s/gen ::core/parsed-body)
                    endpoint-type (gen/elements ["gender" "birthdate" "name"])]
-      (let [result (-> (mock/request :get (str "/records/" endpoint-type))
-                     (assoc :state state)
-                     core/pure-handler)
-            json-result (json/parse-string (:body result) keyword)]
-        (= (count state) (count (:records json-result))))))
+      (= (count state) (count (records endpoint-type state)))))
   (property "all record retrieval endpoints return dates in M/D/YYYY format"
     (prop/for-all [state (s/gen ::core/parsed-body)
                    endpoint-type (gen/elements ["gender" "birthdate" "name"])]
-      (let [result (-> (mock/request :get (str "/records/" endpoint-type))
-                     (assoc :state state)
-                     core/pure-handler)
-            json-result (json/parse-string (:body result) keyword)
-            birthdates (map ::core/birthdate (:records json-result))]
-        (every? #(re-matches #"[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}" %) birthdates))))
+        (every? #(re-matches #"[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}" %)
+                (map ::core/birthdate (records endpoint-type state)))))
   (property "/records/gender returns records sorted by gender, then by last name" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
-      (let [result (-> (mock/request :get "/records/gender")
-                     (assoc :state state)
-                     core/pure-handler)
-            json-result (json/parse-string (:body result) keyword)
-            result-keys (map (juxt ::core/gender ::core/last-name) (:records json-result))]
-        (in-ascending-order? result-keys))))
+      (in-ascending-order? (->> (records "gender" state)
+                             (map (juxt ::core/gender ::core/last-name))))))
   (pending-fact "/records/birthdate returns records sorted by birthdate")
   (pending-fact "/records/name returns records sorted by name"))
 
