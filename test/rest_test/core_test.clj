@@ -14,20 +14,32 @@
 (facts "about the REST service"
   (fact "random URLs respond with 404"
     (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404)
-  (facts "about POST /records"
+  (facts "about posts to /records"
     (fact "posts to /records accept comma-separated values"
       (:status (core/pure-handler (csv-post))) => 200
-      (:state (core/pure-handler (csv-post))) => (just [{:last-name "Fabetes",
-                                                         :first-name "Joe",
-                                                         :gender "male",
-                                                         :favorite-color "blue",
-                                                         :birthdate "1997-02-12"}
-                                                        {:last-name "Smith",
-                                                         :first-name "Jane",
-                                                         :gender "female"
-                                                         :favorite-color "green"
-                                                         :birthdate "1973-05-06"}]))
-    (pending-fact "posts to /records preserve existing records")))
+      (:state (core/pure-handler (csv-post))) => #{{:last-name "Fabetes",
+                                                    :first-name "Joe",
+                                                    :gender "male",
+                                                    :favorite-color "blue",
+                                                    :birthdate "1997-02-12"}
+                                                   {:last-name "Smith",
+                                                    :first-name "Jane",
+                                                    :gender "female"
+                                                    :favorite-color "green"
+                                                    :birthdate "1973-05-06"}})
+    (pending-fact "posts to /records accept pipe-delimited records")
+    (pending-fact "posts to /records accept space-delimited records")
+    (pending-fact "posts to /records preserve existing records")
+    (facts "posts to /records validate input fields"
+      (pending-fact "first name must not be empty")
+      (pending-fact "last name can be empty")
+      (pending-fact "gender must not be empty")
+      (pending-fact "favorite color must not be empty")
+      (pending-fact "birthdate must be a valid date")))
+  (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
+  (pending-fact "/records/gender returns records sorted by gender")
+  (pending-fact "/records/birthdate returns records sorted by birthdate")
+  (pending-fact "/records/name returns records sorted by name"))
 
 
 (defn- results
