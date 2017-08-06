@@ -12,6 +12,11 @@
    "pipe-delimited.txt"
    "space-delimited.txt"])
 
+(s/def ::last-name string?)
+(s/def ::first-name (s/and string? not-empty))
+(s/def ::gender (s/and string? not-empty))
+(s/def ::favorite-color (s/and string? not-empty))
+
 (defn- date-valid?
   [s]
   (let [date-format (doto (SimpleDateFormat. "yyyy-MM-dd")
@@ -21,11 +26,6 @@
       true
       (catch Throwable t
         false))))
-
-(s/def ::last-name string?)
-(s/def ::first-name (s/and string? not-empty))
-(s/def ::gender (s/and string? not-empty))
-(s/def ::favorite-color (s/and string? not-empty))
 
 ;; We supply our own generator for ::birthdate because the default one
 ;; would generate random unicode strings until it finds a valid birthdate.
@@ -54,7 +54,7 @@
                         :opt [::last-name]))
 (s/def ::parsed-body (s/coll-of ::record :kind set?))
 
-(defn not-found
+(defn not-found-handler
   [request]
   {:status 404
    :body "Not found!"})
@@ -72,9 +72,9 @@
                   ::birthdate birthdate})))
         (string/split body #"\n")))
 
-(defn- post-records
+(defn- post-handler
   [handler]
-  (fn post-records* [{:keys [request-method uri state body] :as request}]
+  (fn post-handler* [{:keys [request-method uri state body] :as request}]
     (if-not (= [request-method uri] [:post "/records"])
       (handler request)
       (let [parsed-body (parse-body (slurp body))]
@@ -109,9 +109,7 @@
         entity))
     data))
 
-(json-preferred-keys {::last-name "Fred"})
-
-(defn- get-records
+(defn- get-handler
   [handler kind sort-key-fn descending?]
   (fn get-records* [{:keys [request-method uri state] :as request}]
     (if-not (= [request-method uri] [:get (str "/records/" kind)])
@@ -125,11 +123,11 @@
                          true        json-preferred-keys)}})))
 
 (def pure-handler
-  (-> not-found
-    post-records
-    (get-records "gender" (juxt ::gender ::last-name) false)
-    (get-records "birthdate" ::birthdate false)
-    (get-records "name" ::last-name true)
+  (-> not-found-handler
+    post-handler
+    (get-handler "gender" (juxt ::gender ::last-name) false)
+    (get-handler "birthdate" ::birthdate false)
+    (get-handler "name" ::last-name true)
     ring.middleware.json/wrap-json-response
     (ring.middleware.json/wrap-json-body :keywords? true)))
 
