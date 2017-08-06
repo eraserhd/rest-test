@@ -44,7 +44,7 @@
 
 (defn- records
   [endpoint-kind state]
-  (let [result (-> (mock/request :get "/records/gender")
+  (let [result (-> (mock/request :get (str "/records/" endpoint-kind))
                  (assoc :state state)
                  core/pure-handler)
         json-result (json/parse-string (:body result) keyword)]
@@ -145,7 +145,11 @@
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "gender" state)
                              (map (juxt ::core/gender ::core/last-name))))))
-  (pending-fact "/records/birthdate returns records sorted by birthdate")
+  (property "/records/birthdate returns records sorted by birthdate" 50
+    (prop/for-all [state (s/gen ::core/parsed-body)]
+      (in-ascending-order? (->> (records "birthdate" state)
+                             (map ::core/birthdate)
+                             (map #(.parse (java.text.SimpleDateFormat. "M/d/yyyy") %))))))
   (pending-fact "/records/name returns records sorted by name"))
 
 (defn- results

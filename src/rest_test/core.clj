@@ -91,8 +91,8 @@
       (handler request)
       {:status 200
        :body {:records (->> state
-                         (map #(update % ::birthdate present-date))
-                         (sort-by sort-key-fn))}})))
+                         (sort-by sort-key-fn)
+                         (map #(update % ::birthdate present-date)))}})))
 
 (def pure-handler
   (-> not-found
