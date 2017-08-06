@@ -22,11 +22,11 @@
 
 (defn- post-records
   [handler]
-  (fn [request]
-    (if-not (= [(:request-method request) (:uri request)] [:post "/records"])
+  (fn post-records* [{:keys [request-method uri state body] :as request}]
+    (if-not (= [request-method uri] [:post "/records"])
       (handler request)
       {:status 200
-       :state (into (:state request) (parse-body (slurp (:body request))))})))
+       :state (into state (parse-body (slurp body)))})))
 
 (def pure-handler
   (-> not-found

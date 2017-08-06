@@ -81,6 +81,7 @@
                                                                  :gender "male",
                                                                  :favorite-color "mauve"
                                                                  :birthdate "1981-07-01"}}))
+    (pending-fact "successful posts to /records respond with a JSON success message")
     (facts "posts to /records validate input fields"
       (pending-fact "first name must not be empty")
       (pending-fact "last name can be empty")
