@@ -14,7 +14,7 @@ You can add records using the following curl command:
 $ curl --data-binary @file.txt http://localhost:3000/records
 ```
 
-[leiningen] https://github.com/technomancy/leiningen
+[leiningen]: https://github.com/technomancy/leiningen
 
 ## API
 
