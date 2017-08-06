@@ -3,16 +3,31 @@
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
 
+(defn- csv-post
+  []
+  (-> (mock/request :post "/records")
+    (mock/header "Content-Type" "text/csv")
+    (mock/body (str "Fabetes,Joe,male,blue,1997-02-12\n"
+                    "Smith,Jane,female,green,1973-05-06\n"))
+    (assoc :state [])))
+
 (facts "about the REST service"
   (fact "random URLs respond with 404"
     (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404)
   (facts "about POST /records"
-    (fact "posts to /records accept CSV"
-      (let [csv-post (-> (mock/request :post "/records")
-                       (mock/header "Content-Type" "text/csv")
-                       (mock/body (str "Fabetes,Joe,male,blue,1997-02-12\n"
-                                       "Smith,Jane,female,green,1973-05-06\n")))]
-        (:status (core/pure-handler csv-post)) => 200))))
+    (fact "posts to /records accept comma-separated values"
+      (:status (core/pure-handler (csv-post))) => 200
+      (:state (core/pure-handler (csv-post))) => (just [{:last-name "Fabetes",
+                                                         :first-name "Joe",
+                                                         :gender "male",
+                                                         :favorite-color "blue",
+                                                         :birthdate "1997-02-12"}
+                                                        {:last-name "Smith",
+                                                         :first-name "Jane",
+                                                         :gender "female"
+                                                         :favorite-color "green"
+                                                         :birthdate "1973-05-06"}]))
+    (pending-fact "posts to /records preserve existing records")))
 
 
 (defn- results

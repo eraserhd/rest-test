@@ -1,17 +1,32 @@
 (ns rest-test.core
-  (:require [ring.middleware.json]))
+  (:require [clojure.string :as string]
+            [ring.middleware.json]))
 
 (defn not-found
   [request]
   {:status 404
    :body "Not foestund!"})
 
+(defn- parse-body
+  [body]
+  (into #{}
+        (comp
+          (map #(string/split % #","))
+          (map (fn [[last-name first-name gender favorite-color birthdate]]
+                 {:last-name last-name
+                  :first-name first-name
+                  :gender gender
+                  :favorite-color favorite-color
+                  :birthdate birthdate})))
+        (string/split body #"\n")))
+
 (defn- post-records
   [handler]
   (fn [request]
     (if-not (= [(:request-method request) (:uri request)] [:post "/records"])
       (handler request)
-      {:status 200})))
+      {:status 200
+       :state (parse-body (slurp (:body request)))})))
 
 (def pure-handler
   (-> not-found
