@@ -3,6 +3,7 @@
             [clojure.string :as string]
             [ring.middleware.json]))
 
+(s/def ::last-name string?)
 (s/def ::first-name (s/and string? not-empty))
 (s/def ::record (s/keys :req [::first-name
                               ::gender
