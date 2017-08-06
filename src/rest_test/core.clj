@@ -3,6 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
+            [clojure.walk :as walk]
             [ring.middleware.json])
   (:import [java.text SimpleDateFormat]))
 
@@ -90,6 +91,26 @@
   (let [[year month day] (string/split internal-format #"-")]
     (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
 
+(defn- capitalize [s]
+  (str (.toUpperCase (subs s 0 1)) (subs s 1)))
+
+(defn- uncapitalize [s]
+  (str (.toLowerCase (subs s 0 1)) (subs s 1)))
+
+(defn- json-preferred-keys
+  [data]
+  (walk/postwalk
+    (fn [entity]
+      (if (keyword? entity)
+        (->> (string/split (name entity) #"-")
+          (map capitalize)
+          string/join
+          uncapitalize)
+        entity))
+    data))
+
+(json-preferred-keys {::last-name "Fred"})
+
 (defn- get-records
   [handler kind sort-key-fn descending?]
   (fn get-records* [{:keys [request-method uri state] :as request}]
@@ -100,7 +121,8 @@
                          true        (sort-by sort-key-fn)
                          descending? reverse  ; Didn't actually mean to be cond-descending here,
                                               ; but I couldn't help it.
-                         true        (map #(update % ::birthdate present-date)))}})))
+                         true        (map #(update % ::birthdate present-date))
+                         true        json-preferred-keys)}})))
 
 (def pure-handler
   (-> not-found

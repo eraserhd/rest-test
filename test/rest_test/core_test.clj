@@ -135,7 +135,7 @@
     (prop/for-all [state (s/gen ::core/parsed-body)
                    endpoint-type (gen/elements ["gender" "birthdate" "name"])]
         (every? #(re-matches #"[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}" %)
-                (map ::core/birthdate (records endpoint-type state)))))
+                (map :birthdate (records endpoint-type state)))))
   (property "/records/gender returns records sorted by gender, then by last name" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "gender" state)
@@ -143,12 +143,12 @@
   (property "/records/birthdate returns records sorted ascending by birthdate" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "birthdate" state)
-                             (map ::core/birthdate)
+                             (map :birthdate)
                              (map #(.parse (java.text.SimpleDateFormat. "M/d/yyyy") %))))))
   (property "/records/name returns records sorted descending by last name" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "name" state)
-                             (map ::core/last-name)
+                             (map :last-name)
                              reverse)))))
 
 (defn- results
