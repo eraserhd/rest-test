@@ -47,7 +47,18 @@
                                 :gender "female"
                                 :favorite-color "green"
                                 :birthdate "1973-05-06"}})
-    (pending-fact "posts to /records accept space-delimited records")
+    (fact "posts to /records accept space-delimited records"
+      (:status (post " ")) => 200
+      (:state (post " ")) => #{{:last-name "Fabetes",
+                                :first-name "Joe",
+                                :gender "male",
+                                :favorite-color "blue",
+                                :birthdate "1997-02-12"}
+                               {:last-name "Smith",
+                                :first-name "Jane",
+                                :gender "female"
+                                :favorite-color "green"
+                                :birthdate "1973-05-06"}})
     (pending-fact "posts to /records preserve existing records")
     (facts "posts to /records validate input fields"
       (pending-fact "first name must not be empty")

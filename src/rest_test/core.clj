@@ -11,7 +11,7 @@
   [body]
   (into #{}
         (comp
-          (map #(string/split % #"[,|]"))
+          (map #(string/split % #"[,| ]"))
           (map (fn [[last-name first-name gender favorite-color birthdate]]
                  {:last-name last-name
                   :first-name first-name
