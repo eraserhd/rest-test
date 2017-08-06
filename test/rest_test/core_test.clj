@@ -9,17 +9,12 @@
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
 
-(def ^:private content-types
-  {"," "text/csv"
-   "|" "text/plain"
-   " " "text/plain"})
-
 (defn- post
   [delimiter & [{:keys [initial-state fields]
                  :or {initial-state #{}
                       fields ["Fabetes" "Joe" "male" "blue" "1997-02-12"]}}]]
   (-> (mock/request :post "/records")
-    (mock/header "Content-Type" (get content-types delimiter))
+    (mock/header "Content-Type" "text/plain")
     (mock/body (str
                  (string/join delimiter fields) "\n"
                  (string/join delimiter ["Smith" "Jane" "female" "green" "1973-05-06"]) "\n"))
