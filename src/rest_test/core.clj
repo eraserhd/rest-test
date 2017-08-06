@@ -5,13 +5,13 @@
 (defn not-found
   [request]
   {:status 404
-   :body "Not foestund!"})
+   :body "Not found!"})
 
 (defn- parse-body
   [body]
   (into #{}
         (comp
-          (map #(string/split % #","))
+          (map #(string/split % #"[,|]"))
           (map (fn [[last-name first-name gender favorite-color birthdate]]
                  {:last-name last-name
                   :first-name first-name
