@@ -86,7 +86,7 @@
            :body {:status "error"
                   :error (s/explain-str ::parsed-body parsed-body)}})))))
 
-(defn- present-date
+(defn- format-date
   [internal-format]
   (let [[year month day] (string/split internal-format #"-")]
     (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
@@ -119,7 +119,7 @@
                          true        (sort-by sort-key-fn)
                          descending? reverse  ; Didn't actually mean to be cond-descending here,
                                               ; but I couldn't help it.
-                         true        (map #(update % ::birthdate present-date))
+                         true        (map #(update % ::birthdate format-date))
                          true        json-preferred-keys)}})))
 
 (def pure-handler
