@@ -1,9 +1,15 @@
 (ns rest-test.core
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
             [ring.middleware.json])
   (:import [java.text SimpleDateFormat]))
+
+(def input-files
+  ["comma-delimited.txt"
+   "pipe-delimited.txt"
+   "space-delimited.txt"])
 
 (defn- date-valid?
   [s]
@@ -25,7 +31,7 @@
 ;; How many, on average, would need to be generated before finding a valid
 ;; birth date is left as an exercise to the reader.
 ;;
-;; (We still need gen/such-that to prevent dates like 1976-02-31.)
+;; (We still need gen/such-that to prevent things like February 31st.)
 (s/def ::birthdate
   (s/spec (s/and string? date-valid?)
           :gen (fn make-birthdate-generator []
@@ -121,4 +127,15 @@
             (reset! state-atom (:state result)))
           result)))))
 
-(def handler (wrap-state pure-handler #{}))
+(defn- load-resources
+  []
+  (let [state (reduce
+                (fn [state filename]
+                  (into state (parse-body (slurp (io/resource filename)))))
+                #{}
+                input-files)]
+    (when-not (s/valid? ::parsed-body state)
+      (s/explain ::parsed-body state))
+    state))
+
+(def handler (wrap-state pure-handler (load-resources)))

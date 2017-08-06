@@ -1,0 +1,10 @@
+Bowen,Mario,male,black,1962-05-13
+Hughes,Antonio,male,purple,2013-04-22
+Reynolds,Jeremiah,male,pink,1946-08-30
+Phillips,Caroline,female,green,2010-01-13
+Malone,Sherri,female,taupe,1992-11-18
+Ball,Lana,female,green,1924-03-15
+Miller,Gwen,female,black,1978-06-27
+Floyd,Martin,male,green,1932-10-18
+Smith,Olive,enby,white,1896-09-02
+Fernandez,Woodrow,male,beige,1963-10-06

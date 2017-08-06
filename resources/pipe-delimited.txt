@@ -1,0 +1,10 @@
+Lee|Constance|female|clear|2005-06-12
+Mcdonald|Warren|female|bluegrey|1899-05-18
+Lynch|Gretchen|female|umber|1922-10-04
+Dean|Marta|female|charcoal|2011-07-20
+Becker|Damon|male|pine|2008-04-22
+Sherman|Melissa|female|orange|1932-08-04
+Fuller|Michele|female|silver|1918-02-02
+Johnson|Victoria|female|gold|1905-12-01
+Lowe|Martin|female|apple|2015-07-02
+Matthews|Wilfred|male|red|2013-06-25
