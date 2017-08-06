@@ -59,7 +59,7 @@
   {:status 404
    :body "Not found!"})
 
-(defn- parse-body
+(defn- parse-file
   [body]
   (into #{}
         (comp
@@ -77,7 +77,7 @@
   (fn post-handler* [{:keys [request-method uri state body] :as request}]
     (if-not (= [request-method uri] [:post "/records"])
       (handler request)
-      (let [parsed-body (parse-body (slurp body))]
+      (let [parsed-body (parse-file (slurp body))]
         (if (s/valid? ::parsed-body parsed-body)
           {:status 200
            :state (into state parsed-body)
@@ -151,7 +151,7 @@
   []
   (let [state (reduce
                 (fn [state filename]
-                  (into state (parse-body (slurp (io/resource filename)))))
+                  (into state (parse-file (slurp (io/resource filename)))))
                 #{}
                 input-files)]
     (when-not (s/valid? ::parsed-body state)
