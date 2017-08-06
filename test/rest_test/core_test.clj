@@ -22,6 +22,11 @@
     (assoc :state initial-state)
     core/pure-handler))
 
+(defn- get-records
+  [kind]
+  (-> (mock/request :get (str "/records/" (name kind)))
+    core/pure-handler))
+
 (facts "about the REST service"
   (fact "random URLs respond with 404"
     (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404)
@@ -101,7 +106,8 @@
         (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "1992-02-30"]})) => 400
         (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "1992-03-31"]})) => 200)))
   (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
-  (pending-fact "/records/gender returns records sorted by gender")
+  (fact "/records/gender returns records sorted by gender"
+    (:status (get-records :gender)) => 200)
   (pending-fact "/records/birthdate returns records sorted by birthdate")
   (pending-fact "/records/name returns records sorted by name"))
 
