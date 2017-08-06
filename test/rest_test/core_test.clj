@@ -145,12 +145,16 @@
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "gender" state)
                              (map (juxt ::core/gender ::core/last-name))))))
-  (property "/records/birthdate returns records sorted by birthdate" 50
+  (property "/records/birthdate returns records sorted ascending by birthdate" 50
     (prop/for-all [state (s/gen ::core/parsed-body)]
       (in-ascending-order? (->> (records "birthdate" state)
                              (map ::core/birthdate)
                              (map #(.parse (java.text.SimpleDateFormat. "M/d/yyyy") %))))))
-  (pending-fact "/records/name returns records sorted by name"))
+  (property "/records/name returns records sorted descending by last name" 50
+    (prop/for-all [state (s/gen ::core/parsed-body)]
+      (in-ascending-order? (->> (records "name" state)
+                             (map ::core/last-name)
+                             reverse)))))
 
 (defn- results
   [requests]

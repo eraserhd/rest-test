@@ -85,21 +85,23 @@
     (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
 
 (defn- get-records
-  [handler kind sort-key-fn]
+  [handler kind sort-key-fn descending?]
   (fn get-records* [{:keys [request-method uri state] :as request}]
     (if-not (= [request-method uri] [:get (str "/records/" kind)])
       (handler request)
       {:status 200
-       :body {:records (->> state
-                         (sort-by sort-key-fn)
-                         (map #(update % ::birthdate present-date)))}})))
+       :body {:records (cond->> state
+                         true        (sort-by sort-key-fn)
+                         descending? reverse  ; Didn't actually mean to be cond-descending here,
+                                              ; but I couldn't help it.
+                         true        (map #(update % ::birthdate present-date)))}})))
 
 (def pure-handler
   (-> not-found
     post-records
-    (get-records "gender" (juxt ::gender ::last-name))
-    (get-records "birthdate" ::birthdate)
-    (get-records "name" ::first-name)
+    (get-records "gender" (juxt ::gender ::last-name) false)
+    (get-records "birthdate" ::birthdate false)
+    (get-records "name" ::last-name true)
     ring.middleware.json/wrap-json-response
     (ring.middleware.json/wrap-json-body :keywords? true)))
 
