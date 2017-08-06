@@ -1,6 +1,10 @@
 (ns rest-test.core-test
   (:require [cheshire.core :as json]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
+            [clojure.test.check]
+            [clojure.test.check.properties :as prop]
             [midje.sweet :refer :all]
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
@@ -22,10 +26,25 @@
     (assoc :state initial-state)
     core/pure-handler))
 
-(defn- get-records
-  [kind]
-  (-> (mock/request :get (str "/records/" (name kind)))
-    core/pure-handler))
+(defn holds?
+  "Does a property hold?
+
+  A custom midje checker used so that we can see the whole failed test.check
+  output when it fails."
+  [result]
+  (= true (:result result)))
+
+(defmacro property
+  "Make a test.check property into a Midje fact."
+  ([descr prop]
+   `(property ~descr 25 ~prop))
+  ([descr trials prop]
+   `(fact ~descr
+      (clojure.test.check/quick-check ~trials ~prop) => holds?)))
+
+(defn- in-ascending-order?
+  [coll]
+  (every? (fn [[a b]] (<= a b)) (partition 2 1 coll)))
 
 (facts "about the REST service"
   (fact "random URLs respond with 404"
@@ -105,9 +124,16 @@
         (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "garbage"]})) => 400
         (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "1992-02-30"]})) => 400
         (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "1992-03-31"]})) => 200)))
+  (property "all record retrieval endpoints return all records"
+    (prop/for-all [state (s/gen ::core/parsed-body)
+                   endpoint-type (gen/elements ["gender" "birthdate" "name"])]
+      (let [result (-> (mock/request :get (str "/records/" endpoint-type))
+                     (assoc :state state)
+                     core/pure-handler)
+            json-result (json/parse-string (:body result) keyword)]
+        (= state (into #{} (:records json-result))))))
   (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
-  (fact "/records/gender returns records sorted by gender"
-    (:status (get-records :gender)) => 200)
+  (pending-fact "/records/gender returns records sorted by gender")
   (pending-fact "/records/birthdate returns records sorted by birthdate")
   (pending-fact "/records/name returns records sorted by name"))
 

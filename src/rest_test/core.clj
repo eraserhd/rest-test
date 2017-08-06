@@ -79,16 +79,19 @@
                   :error (s/explain-str ::parsed-body parsed-body)}})))))
 
 (defn- get-records
-  [handler kind sort-fn]
+  [handler kind]
   (fn get-records* [{:keys [request-method uri state] :as request}]
     (if-not (= [request-method uri] [:get (str "/records/" kind)])
       (handler request)
-      {:status 200})))
+      {:status 200
+       :body {:records state}})))
 
 (def pure-handler
   (-> not-found
     post-records
-    (get-records "gender" :gender)
+    (get-records "gender")
+    (get-records "birthdate")
+    (get-records "name")
     ring.middleware.json/wrap-json-response
     (ring.middleware.json/wrap-json-body :keywords? true)))
 
