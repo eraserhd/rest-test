@@ -91,7 +91,8 @@
         (:status (post "," {:fields ["Fabetes" "" "male" "blue" "1997-02-12"]})) => 400)
       (fact "last name can be empty"
         (:status (post "," {:fields ["" "Joe" "male" "blue" "1997-02-12"]})) => 200)
-      (pending-fact "gender must not be empty")
+      (fact "gender must not be empty"
+        (:status (post "," {:fields ["Fabetes" "Joe" "" "blue" "1997-02-12"]})) => 400)
       (pending-fact "favorite color must not be empty")
       (pending-fact "birthdate must be a valid date")))
   (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
