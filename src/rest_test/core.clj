@@ -1,12 +1,24 @@
 (ns rest-test.core
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
-            [ring.middleware.json]))
+            [ring.middleware.json])
+  (:import [java.text SimpleDateFormat]))
+
+(defn- date-valid?
+  [s]
+  (let [date-format (doto (SimpleDateFormat. "yyyy-MM-dd")
+                      (.setLenient false))]
+    (try
+      (.parse date-format s)
+      true
+      (catch Throwable t
+        false))))
 
 (s/def ::last-name string?)
 (s/def ::first-name (s/and string? not-empty))
 (s/def ::gender (s/and string? not-empty))
 (s/def ::favorite-color (s/and string? not-empty))
+(s/def ::birthdate (s/and string? date-valid?))
 (s/def ::record (s/keys :req [::first-name
                               ::gender
                               ::favorite-color

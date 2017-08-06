@@ -95,7 +95,11 @@
         (:status (post "," {:fields ["Fabetes" "Joe" "" "blue" "1997-02-12"]})) => 400)
       (fact "favorite color must not be empty"
         (:status (post "," {:fields ["Fabetes" "Joe" "male" "" "1997-02-12"]})) => 400)
-      (pending-fact "birthdate must be a valid date")))
+      (fact "birthdate must be a valid date"
+        (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" ""]})) => 400
+        (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "garbage"]})) => 400
+        (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "1992-02-30"]})) => 400
+        (:status (post "," {:fields ["Fabetes" "Joe" "male" "blue" "1992-03-31"]})) => 200)))
   (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
   (pending-fact "/records/gender returns records sorted by gender")
   (pending-fact "/records/birthdate returns records sorted by birthdate")
