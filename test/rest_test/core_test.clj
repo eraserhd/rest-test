@@ -1,14 +1,21 @@
 (ns rest-test.core-test
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.string :as string]
+            [midje.sweet :refer :all]
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
 
-(defn- csv-post
-  []
+(def ^:private content-types
+  {"," "text/csv"
+   "|" "text/plain"
+   " " "text/plain"})
+
+(defn- post
+  [delimiter]
   (-> (mock/request :post "/records")
-    (mock/header "Content-Type" "text/csv")
-    (mock/body (str "Fabetes,Joe,male,blue,1997-02-12\n"
-                    "Smith,Jane,female,green,1973-05-06\n"))
+    (mock/header "Content-Type" (get content-types delimiter))
+    (mock/body (str
+                 (string/join delimiter ["Fabetes" "Joe" "male" "blue" "1997-02-12"]) "\n"
+                 (string/join delimiter ["Smith" "Jane" "female" "green" "1973-05-06"]) "\n"))
     (assoc :state [])))
 
 (facts "about the REST service"
@@ -16,8 +23,8 @@
     (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404)
   (facts "about posts to /records"
     (fact "posts to /records accept comma-separated values"
-      (:status (core/pure-handler (csv-post))) => 200
-      (:state (core/pure-handler (csv-post))) => #{{:last-name "Fabetes",
+      (:status (core/pure-handler (post ","))) => 200
+      (:state (core/pure-handler (post ","))) => #{{:last-name "Fabetes",
                                                     :first-name "Joe",
                                                     :gender "male",
                                                     :favorite-color "blue",
