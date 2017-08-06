@@ -78,13 +78,19 @@
            :body {:status "error"
                   :error (s/explain-str ::parsed-body parsed-body)}})))))
 
+(defn- present-date
+  [internal-format]
+  (let [[year month day] (string/split internal-format #"-")]
+    (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
+
 (defn- get-records
   [handler kind]
   (fn get-records* [{:keys [request-method uri state] :as request}]
     (if-not (= [request-method uri] [:get (str "/records/" kind)])
       (handler request)
       {:status 200
-       :body {:records state}})))
+       :body {:records (->> state
+                         (map #(update % ::birthdate present-date)))}})))
 
 (def pure-handler
   (-> not-found

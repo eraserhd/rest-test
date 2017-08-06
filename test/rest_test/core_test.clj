@@ -131,12 +131,19 @@
                      (assoc :state state)
                      core/pure-handler)
             json-result (json/parse-string (:body result) keyword)]
-        (= state (into #{} (:records json-result))))))
-  (pending-fact "all record retrieval endpoints return dates in M/D/YYYY format")
+        (= (count state) (count (:records json-result))))))
+  (property "all record retrieval endpoints return dates in M/D/YYYY format"
+    (prop/for-all [state (s/gen ::core/parsed-body)
+                   endpoint-type (gen/elements ["gender" "birthdate" "name"])]
+      (let [result (-> (mock/request :get (str "/records/" endpoint-type))
+                     (assoc :state state)
+                     core/pure-handler)
+            json-result (json/parse-string (:body result) keyword)
+            birthdates (map ::core/birthdate (:records json-result))]
+        (every? #(re-matches #"[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}" %) birthdates))))
   (pending-fact "/records/gender returns records sorted by gender")
   (pending-fact "/records/birthdate returns records sorted by birthdate")
   (pending-fact "/records/name returns records sorted by name"))
-
 
 (defn- results
   [requests]
