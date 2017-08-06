@@ -1,10 +1,74 @@
 # rest-test
 
-A Clojure library designed to ... well, that part is up to you.
+An example REST service.
 
 ## Usage
 
-FIXME
+You can start the server locally, assuming you have [leiningen] installed,
+with the command `lein ring server`.  This will automatically open a browser
+window to `localhost:3000`, although the root URL is not handled so you
+will see the message "Not found!"
+
+You can add records using the following curl command:
+```
+$ curl --data-binary @file.txt http://localhost:3000/records
+```
+
+[leiningen] https://github.com/technomancy/leiningen
+
+## API
+
+### POST /records
+
+POST requests to `/records` should have the "Content-Type" header set to
+`text/csv` or `text/plain`.
+
+The POST body should be one line per record, with each field separated by
+delimiters.  The delimiters can be `,`, `|`, or ` ` (a space).  Delimiters
+may not be doubled.
+
+End-of-line characters should be single newline (`\n`) characters.  A newline
+at the end of the file is accepted.
+
+### The GET endpoints
+
+There are three GET endpoints:
+
+- `/records/birthdate`
+- `/records/gender`
+- `/records/name`
+
+All three return the same format response, except for the sort order of the
+records.  Here's an example response:
+
+```json
+{
+  "records": [
+    {
+      "lastName": "Smith",
+      "firstName": "Olive",
+      "gender": "enby",
+      "favoriteColor": "white",
+      "birthdate": "9/2/1896"
+    },
+    {
+      "lastName": "Xmith",
+      "firstName": "Olive",
+      "gender": "enby",
+      "favoriteColor": "white",
+      "birthdate": "9/2/1896"
+    }
+  ]
+}
+```
+
+The sort order is:
+
+| Endpoint             | Sort Order                                 |
+|----------------------|--------------------------------------------|
+| `/records/birthdate` | Date of birth, ascending                   |
+| `/records/gender`    | Gender ascending, then last name ascending |
+| `/records/name`      | Last name, descending                      |
 
 ## Development
 
