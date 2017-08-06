@@ -5,7 +5,15 @@
 
 (facts "about the REST service"
   (fact "random URLs respond with 404"
-    (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404))
+    (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404)
+  (facts "about POST /records"
+    (fact "posts to /records accept CSV"
+      (let [csv-post (-> (mock/request :post "/records")
+                       (mock/header "Content-Type" "text/csv")
+                       (mock/body (str "Fabetes,Joe,male,blue,1997-02-12\n"
+                                       "Smith,Jane,female,green,1973-05-06\n")))]
+        (:status (core/pure-handler csv-post)) => 200))))
+
 
 (defn- results
   [requests]

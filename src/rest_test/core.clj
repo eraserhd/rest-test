@@ -4,10 +4,18 @@
 (defn not-found
   [request]
   {:status 404
-   :body "Not found!"})
+   :body "Not foestund!"})
+
+(defn- post-records
+  [handler]
+  (fn [request]
+    (if-not (= [(:request-method request) (:uri request)] [:post "/records"])
+      (handler request)
+      {:status 200})))
 
 (def pure-handler
   (-> not-found
+    post-records
     ring.middleware.json/wrap-json-response
     (ring.middleware.json/wrap-json-body :keywords? true)))
 
