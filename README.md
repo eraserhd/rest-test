@@ -30,6 +30,16 @@ may not be doubled.
 End-of-line characters should be single newline (`\n`) characters.  A newline
 at the end of the file is accepted.
 
+All fields must be present and in the following order (last name can be blank, though):
+
+- **Last Name**
+- **First Name**
+- **Gender**
+- **Favorite Color**
+- **Date of Birth** (must be presented in YYYY-MM-DD format)
+
+Fields cannot contain any possible delimiter characters.
+
 ### The GET endpoints
 
 There are three GET endpoints:
