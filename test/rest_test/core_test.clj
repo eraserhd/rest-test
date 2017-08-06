@@ -16,24 +16,25 @@
     (mock/body (str
                  (string/join delimiter ["Fabetes" "Joe" "male" "blue" "1997-02-12"]) "\n"
                  (string/join delimiter ["Smith" "Jane" "female" "green" "1973-05-06"]) "\n"))
-    (assoc :state [])))
+    (assoc :state [])
+    core/pure-handler))
 
 (facts "about the REST service"
   (fact "random URLs respond with 404"
     (:status (core/pure-handler (mock/request :get "/somewhere/random"))) => 404)
   (facts "about posts to /records"
     (fact "posts to /records accept comma-separated values"
-      (:status (core/pure-handler (post ","))) => 200
-      (:state (core/pure-handler (post ","))) => #{{:last-name "Fabetes",
-                                                    :first-name "Joe",
-                                                    :gender "male",
-                                                    :favorite-color "blue",
-                                                    :birthdate "1997-02-12"}
-                                                   {:last-name "Smith",
-                                                    :first-name "Jane",
-                                                    :gender "female"
-                                                    :favorite-color "green"
-                                                    :birthdate "1973-05-06"}})
+      (:status (post ",")) => 200
+      (:state (post ",")) => #{{:last-name "Fabetes",
+                                :first-name "Joe",
+                                :gender "male",
+                                :favorite-color "blue",
+                                :birthdate "1997-02-12"}
+                               {:last-name "Smith",
+                                :first-name "Jane",
+                                :gender "female"
+                                :favorite-color "green"
+                                :birthdate "1973-05-06"}})
     (pending-fact "posts to /records accept pipe-delimited records")
     (pending-fact "posts to /records accept space-delimited records")
     (pending-fact "posts to /records preserve existing records")
