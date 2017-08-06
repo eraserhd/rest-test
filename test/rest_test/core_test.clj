@@ -10,13 +10,14 @@
    " " "text/plain"})
 
 (defn- post
-  [delimiter]
+  [delimiter & [{:keys [initial-state]
+                 :or {initial-state #{}}}]]
   (-> (mock/request :post "/records")
     (mock/header "Content-Type" (get content-types delimiter))
     (mock/body (str
                  (string/join delimiter ["Fabetes" "Joe" "male" "blue" "1997-02-12"]) "\n"
                  (string/join delimiter ["Smith" "Jane" "female" "green" "1973-05-06"]) "\n"))
-    (assoc :state [])
+    (assoc :state initial-state)
     core/pure-handler))
 
 (facts "about the REST service"
@@ -59,7 +60,27 @@
                                 :gender "female"
                                 :favorite-color "green"
                                 :birthdate "1973-05-06"}})
-    (pending-fact "posts to /records preserve existing records")
+    (fact "posts to /records preserve existing records"
+      (let [initial-state #{{:last-name "Begone"
+                             :first-name "Bob"
+                             :gender "male"
+                             :favorite-color "mauve"
+                             :birthdate "1981-07-01"}}]
+        (:state (post "," {:initial-state initial-state})) => #{{:last-name "Fabetes",
+                                                                 :first-name "Joe",
+                                                                 :gender "male",
+                                                                 :favorite-color "blue",
+                                                                 :birthdate "1997-02-12"}
+                                                                {:last-name "Smith",
+                                                                 :first-name "Jane",
+                                                                 :gender "female"
+                                                                 :favorite-color "green"
+                                                                 :birthdate "1973-05-06"}
+                                                                {:last-name "Begone",
+                                                                 :first-name "Bob",
+                                                                 :gender "male",
+                                                                 :favorite-color "mauve"
+                                                                 :birthdate "1981-07-01"}}))
     (facts "posts to /records validate input fields"
       (pending-fact "first name must not be empty")
       (pending-fact "last name can be empty")
