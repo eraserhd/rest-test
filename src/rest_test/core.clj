@@ -26,7 +26,8 @@
     (if-not (= [request-method uri] [:post "/records"])
       (handler request)
       {:status 200
-       :state (into state (parse-body (slurp body)))})))
+       :state (into state (parse-body (slurp body)))
+       :body {:status "ok"}})))
 
 (def pure-handler
   (-> not-found

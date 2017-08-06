@@ -1,5 +1,6 @@
 (ns rest-test.core-test
-  (:require [clojure.string :as string]
+  (:require [cheshire.core :as json]
+            [clojure.string :as string]
             [midje.sweet :refer :all]
             [ring.mock.request :as mock]
             [rest-test.core :as core]))
@@ -81,7 +82,9 @@
                                                                  :gender "male",
                                                                  :favorite-color "mauve"
                                                                  :birthdate "1981-07-01"}}))
-    (pending-fact "successful posts to /records respond with a JSON success message")
+    (fact "successful posts to /records respond with a JSON success message"
+      (:headers (post ",")) => (contains {"Content-Type" #"application/json"})
+      (json/parse-string (:body (post ","))) => {"status" "ok"})
     (facts "posts to /records validate input fields"
       (pending-fact "first name must not be empty")
       (pending-fact "last name can be empty")
