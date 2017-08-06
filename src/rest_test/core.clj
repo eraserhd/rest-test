@@ -91,9 +91,6 @@
   (let [[year month day] (string/split internal-format #"-")]
     (format "%d/%d/%s" (Long/parseLong month) (Long/parseLong day) year)))
 
-(defn- capitalize [s]
-  (str (.toUpperCase (subs s 0 1)) (subs s 1)))
-
 (defn- uncapitalize [s]
   (str (.toLowerCase (subs s 0 1)) (subs s 1)))
 
@@ -103,7 +100,7 @@
     (fn [entity]
       (if (keyword? entity)
         (->> (string/split (name entity) #"-")
-          (map capitalize)
+          (map string/capitalize)
           string/join
           uncapitalize)
         entity))
