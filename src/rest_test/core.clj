@@ -55,7 +55,7 @@
                         :opt [::last-name]))
 (s/def ::parsed-body (s/coll-of ::record :kind set?))
 
-(defn not-found-handler
+(defn- not-found-handler
   [request]
   {:status 404
    :body "Not found!"})
@@ -131,6 +131,8 @@
     (get-handler "birthdate" ::birthdate false)
     (get-handler "name" ::last-name true)
     ring.middleware.json/wrap-json-response))
+
+;; Everything below this line isn't (mechanically) tested
 
 (defn- load-resources
   []
