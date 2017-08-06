@@ -13,11 +13,11 @@
         (comp
           (map #(string/split % #"[,| ]"))
           (map (fn [[last-name first-name gender favorite-color birthdate]]
-                 {:last-name last-name
-                  :first-name first-name
-                  :gender gender
-                  :favorite-color favorite-color
-                  :birthdate birthdate})))
+                 {::last-name last-name
+                  ::first-name first-name
+                  ::gender gender
+                  ::favorite-color favorite-color
+                  ::birthdate birthdate})))
         (string/split body #"\n")))
 
 (defn- post-records

@@ -27,61 +27,61 @@
   (facts "about posts to /records"
     (fact "posts to /records accept comma-separated values"
       (:status (post ",")) => 200
-      (:state (post ",")) => #{{:last-name "Fabetes",
-                                :first-name "Joe",
-                                :gender "male",
-                                :favorite-color "blue",
-                                :birthdate "1997-02-12"}
-                               {:last-name "Smith",
-                                :first-name "Jane",
-                                :gender "female"
-                                :favorite-color "green"
-                                :birthdate "1973-05-06"}})
+      (:state (post ",")) => #{{::core/last-name "Fabetes",
+                                ::core/first-name "Joe",
+                                ::core/gender "male",
+                                ::core/favorite-color "blue",
+                                ::core/birthdate "1997-02-12"}
+                               {::core/last-name "Smith",
+                                ::core/first-name "Jane",
+                                ::core/gender "female"
+                                ::core/favorite-color "green"
+                                ::core/birthdate "1973-05-06"}})
     (fact "posts to /records accept pipe-delimited records"
       (:status (post "|")) => 200
-      (:state (post "|")) => #{{:last-name "Fabetes",
-                                :first-name "Joe",
-                                :gender "male",
-                                :favorite-color "blue",
-                                :birthdate "1997-02-12"}
-                               {:last-name "Smith",
-                                :first-name "Jane",
-                                :gender "female"
-                                :favorite-color "green"
-                                :birthdate "1973-05-06"}})
+      (:state (post "|")) => #{{::core/last-name "Fabetes",
+                                ::core/first-name "Joe",
+                                ::core/gender "male",
+                                ::core/favorite-color "blue",
+                                ::core/birthdate "1997-02-12"}
+                               {::core/last-name "Smith",
+                                ::core/first-name "Jane",
+                                ::core/gender "female"
+                                ::core/favorite-color "green"
+                                ::core/birthdate "1973-05-06"}})
     (fact "posts to /records accept space-delimited records"
       (:status (post " ")) => 200
-      (:state (post " ")) => #{{:last-name "Fabetes",
-                                :first-name "Joe",
-                                :gender "male",
-                                :favorite-color "blue",
-                                :birthdate "1997-02-12"}
-                               {:last-name "Smith",
-                                :first-name "Jane",
-                                :gender "female"
-                                :favorite-color "green"
-                                :birthdate "1973-05-06"}})
+      (:state (post " ")) => #{{::core/last-name "Fabetes",
+                                ::core/first-name "Joe",
+                                ::core/gender "male",
+                                ::core/favorite-color "blue",
+                                ::core/birthdate "1997-02-12"}
+                               {::core/last-name "Smith",
+                                ::core/first-name "Jane",
+                                ::core/gender "female"
+                                ::core/favorite-color "green"
+                                ::core/birthdate "1973-05-06"}})
     (fact "posts to /records preserve existing records"
-      (let [initial-state #{{:last-name "Begone"
-                             :first-name "Bob"
-                             :gender "male"
-                             :favorite-color "mauve"
-                             :birthdate "1981-07-01"}}]
-        (:state (post "," {:initial-state initial-state})) => #{{:last-name "Fabetes",
-                                                                 :first-name "Joe",
-                                                                 :gender "male",
-                                                                 :favorite-color "blue",
-                                                                 :birthdate "1997-02-12"}
-                                                                {:last-name "Smith",
-                                                                 :first-name "Jane",
-                                                                 :gender "female"
-                                                                 :favorite-color "green"
-                                                                 :birthdate "1973-05-06"}
-                                                                {:last-name "Begone",
-                                                                 :first-name "Bob",
-                                                                 :gender "male",
-                                                                 :favorite-color "mauve"
-                                                                 :birthdate "1981-07-01"}}))
+      (let [initial-state #{{::core/last-name "Begone"
+                             ::core/first-name "Bob"
+                             ::core/gender "male"
+                             ::core/favorite-color "mauve"
+                             ::core/birthdate "1981-07-01"}}]
+        (:state (post "," {:initial-state initial-state})) => #{{::core/last-name "Fabetes",
+                                                                 ::core/first-name "Joe",
+                                                                 ::core/gender "male",
+                                                                 ::core/favorite-color "blue",
+                                                                 ::core/birthdate "1997-02-12"}
+                                                                {::core/last-name "Smith",
+                                                                 ::core/first-name "Jane",
+                                                                 ::core/gender "female"
+                                                                 ::core/favorite-color "green"
+                                                                 ::core/birthdate "1973-05-06"}
+                                                                {::core/last-name "Begone",
+                                                                 ::core/first-name "Bob",
+                                                                 ::core/gender "male",
+                                                                 ::core/favorite-color "mauve"
+                                                                 ::core/birthdate "1981-07-01"}}))
     (fact "successful posts to /records respond with a JSON success message"
       (:headers (post ",")) => (contains {"Content-Type" #"application/json"})
       (json/parse-string (:body (post ","))) => {"status" "ok"})
