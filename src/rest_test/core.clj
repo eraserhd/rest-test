@@ -96,20 +96,25 @@
   [s]
   (str (.toLowerCase (subs s 0 1)) (subs s 1)))
 
-(defn- json-preferred-keys
+(defn- wrap-json-preferred-keys
   "Replace keywords in data with strings preferred in JSON.
 
-  e.g. :first-name ;=> \"firstName\""
-  [data]
-  (walk/postwalk
-    (fn [entity]
-      (if (keyword? entity)
-        (->> (string/split (name entity) #"-")
-          (map string/capitalize)
-          string/join
-          uncapitalize)
-        entity))
-    data))
+  e.g. :first-name becomes \"firstName\""
+  [handler]
+  (fn wrap-json-preferred-keys* [request]
+    (let [response (handler request)]
+      (cond-> response
+        (coll? (:body response))
+        (update :body (fn [body]
+                        (walk/postwalk
+                          (fn [entity]
+                            (if (keyword? entity)
+                              (->> (string/split (name entity) #"-")
+                                (map string/capitalize)
+                                string/join
+                                uncapitalize)
+                              entity))
+                          body)))))))
 
 (defn- get-handler
   [handler kind sort-key-fn descending?]
@@ -121,8 +126,7 @@
                          true        (sort-by sort-key-fn)
                          descending? reverse  ; Didn't actually mean to be cond-descending here,
                                               ; but I couldn't help it.
-                         true        (map #(update % ::birthdate format-date))
-                         true        json-preferred-keys)}})))
+                         true        (map #(update % ::birthdate format-date)))}})))
 
 (def pure-handler
   (-> not-found-handler
@@ -130,6 +134,7 @@
     (get-handler "gender" (juxt ::gender ::last-name) false)
     (get-handler "birthdate" ::birthdate false)
     (get-handler "name" ::last-name true)
+    wrap-json-preferred-keys
     ring.middleware.json/wrap-json-response))
 
 ;; Everything below this line isn't (mechanically) tested
