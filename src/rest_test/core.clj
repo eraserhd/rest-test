@@ -4,6 +4,7 @@
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
             [clojure.walk :as walk]
+            [rest-test.state :as state]
             [ring.middleware.json])
   (:import [java.text SimpleDateFormat]))
 
@@ -131,22 +132,6 @@
     (get-handler "name" ::last-name true)
     ring.middleware.json/wrap-json-response))
 
-(defn wrap-state
-  "Ring middleware to track application state.
-
-  Wrapped middleware is supplied with the current state in the `:state` key
-  in the request.  If a `:state` key is returned in the wrapped middleware's
-  response, the new state is updated.  This is done in a Clojure STM
-  transaction to prevent races."
-  [inner-handler initial-value]
-  (let [state-atom (atom initial-value)]
-    (fn [request]
-      (dosync
-        (let [result (inner-handler (assoc request :state @state-atom))]
-          (when (contains? result :state)
-            (reset! state-atom (:state result)))
-          result)))))
-
 (defn- load-resources
   []
   (let [state (reduce
@@ -158,4 +143,4 @@
       (s/explain ::parsed-body state))
     state))
 
-(def handler (wrap-state pure-handler (load-resources)))
+(def handler (state/wrap-state pure-handler (load-resources)))
