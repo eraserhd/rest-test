@@ -128,8 +128,7 @@
     (get-handler "gender" (juxt ::gender ::last-name) false)
     (get-handler "birthdate" ::birthdate false)
     (get-handler "name" ::last-name true)
-    ring.middleware.json/wrap-json-response
-    (ring.middleware.json/wrap-json-body :keywords? true)))
+    ring.middleware.json/wrap-json-response))
 
 (defn wrap-state
   "Ring middleware to track application state.
