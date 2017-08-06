@@ -121,4 +121,4 @@
             (reset! state-atom (:state result)))
           result)))))
 
-(def handler (wrap-state pure-handler []))
+(def handler (wrap-state pure-handler #{}))
