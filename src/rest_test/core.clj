@@ -3,7 +3,6 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
             [clojure.string :as string]
-            [rest-test.json]
             [rest-test.state :as state]
             [ring.middleware.json])
   (:import [java.text SimpleDateFormat]))
@@ -47,12 +46,11 @@
                        (gen/choose 1 12)
                        (gen/choose 1 31)))))))
 
-
-(s/def ::record (s/keys :req [::firstName
-                              ::gender
-                              ::favoriteColor
-                              ::birthdate]
-                        :opt [::lastName]))
+(s/def ::record (s/keys :req-un [::firstName
+                                 ::gender
+                                 ::favoriteColor
+                                 ::birthdate]
+                        :opt-un [::lastName]))
 (s/def ::parsed-body (s/coll-of ::record :kind set?))
 
 (defn- not-found-handler
@@ -66,11 +64,11 @@
         (comp
           (map #(string/split % #"[,| ]"))
           (map (fn [[lastName firstName gender favoriteColor birthdate]]
-                 {::lastName lastName
-                  ::firstName firstName
-                  ::gender gender
-                  ::favoriteColor favoriteColor
-                  ::birthdate birthdate})))
+                 {:lastName lastName
+                  :firstName firstName
+                  :gender gender
+                  :favoriteColor favoriteColor
+                  :birthdate birthdate})))
         (string/split body #"\n")))
 
 (defn- post-handler
@@ -102,15 +100,14 @@
                          true        (sort-by sort-key-fn)
                          descending? reverse  ; Didn't actually mean to be cond-descending here,
                                               ; but I couldn't help it.
-                         true        (map #(update % ::birthdate format-date)))}})))
+                         true        (map #(update % :birthdate format-date)))}})))
 
 (def pure-handler
   (-> not-found-handler
     post-handler
-    (get-handler "gender" (juxt ::gender ::lastName) false)
-    (get-handler "birthdate" ::birthdate false)
-    (get-handler "name" ::lastName true)
-    rest-test.json/wrap-json-preferred-keys
+    (get-handler "gender" (juxt :gender :lastName) false)
+    (get-handler "birthdate" :birthdate false)
+    (get-handler "name" :lastName true)
     ring.middleware.json/wrap-json-response))
 
 ;; Everything below this line isn't (mechanically) tested
